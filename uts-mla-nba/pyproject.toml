@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "uts-mla-nba"
+version = "0.1.0"
+description = "NBA College Player Predictor Model"
+authors = ["sahilkotak"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "uts_mla_nba"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = "2.0.1"
+jupyterlab = "3.6.3"
+scikit-learn = "1.2.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
