@@ -31,13 +31,22 @@ def preprocess_func(df, original_df=None, train_stats=None, missing_threshold=0.
             'midmade_midmiss': df['midmade_midmiss'].median(),
             'dunksmade': df['dunksmade'].median(),
             'yr_mode': df['yr'].mode()[0],
+            'ht_median': df['ht'].median(),
             'medians': {column: df[column].median() for column in ['midmade', 'rimmade', 'mid_ratio',
                                                                    'dunksmiss_dunksmade', 'rim_ratio',
-                                                                   'rimmade_rimmiss', 'dunks_ratio', 'ast_tov']}
+                                                                   'rimmade_rimmiss', 'dunks_ratio', 'ast_tov',
+                                                                   'drtg', 'adrtg', 'dporpag', 'stops', 'bpm', 
+                                                                   'obpm', 'dbpm', 'gbpm', 'ogbpm', 'dgbpm']}
         }
+
+    #TO VERIFY: Instead of dropping rows with NaN in 'ht', we impute them with the median height from the training dataset.
+    df['ht'].fillna(train_stats['ht_median'], inplace=True)
 
     df['midmade_midmiss'].fillna(train_stats['midmade_midmiss'], inplace=True)
     df['dunksmade'].fillna(train_stats['dunksmade'], inplace=True)
+
+    #TO VERIFY: Instead of dropping rows that don't match our expected values (Fr, So, Jr, Sr), we impute them with the mode (most frequent value) of the training dataset.
+    df['yr'].fillna(train_stats['yr_mode'], inplace=True)
 
     # Handle 'yr' column
     year_mapping = {
@@ -46,18 +55,14 @@ def preprocess_func(df, original_df=None, train_stats=None, missing_threshold=0.
         'Jr': 3,
         'Sr': 4
     }
-    df['yr'] = df['yr'].map(year_mapping)
-    df['yr'].fillna(train_stats['yr_mode'], inplace=True)
+
+    # Check if the column has object (string) type values and apply the mapping
+    if df['yr'].dtype == 'O':
+        df['yr'] = df['yr'].map(year_mapping)
 
     # Handle columns with moderate missing values
     for column, median_value in train_stats['medians'].items():
         df[column].fillna(median_value, inplace=True)
-
-    # Drop rows with a small percentage of missing values
-    missing_data_percentage = df.isnull().sum() / len(df)
-    columns_to_check_for_missing = missing_data_percentage[missing_data_percentage < missing_threshold].index.tolist(
-    )
-    df = df.dropna(subset=columns_to_check_for_missing)
 
     # 3. Drop Columns and Rows
 
@@ -65,21 +70,27 @@ def preprocess_func(df, original_df=None, train_stats=None, missing_threshold=0.
     if 'num' in df.columns:
         df = df.drop('num', axis=1)
 
-    # Drop rows that originally had NaN values in the 'ht' column
+    #TO VERIFY: Instead of dropping rows that originally had NaN values in the 'ht' column, we impute the missing height values using the median height from the training dataset.
     if original_df is not None:
-        df = df[~original_df['ht'].isnull()]
+        # Synchronize the index before filtering
+        mask = original_df.loc[df.index, 'ht'].isnull()
+        df.loc[mask, 'ht'] = train_stats['ht_median']
 
     # Drop 'pick' column if it exists
     if 'pick' in df.columns:
         df = df.drop('pick', axis=1)
 
-    # Drop rows with NaN values in certain columns
+    #TO VERIFY: Instead of dropping rows with NaN values in certain columns, we use the median of the training dataset for imputation.
     columns_to_check = ['ht', 'yr', 'oreb', 'dreb',
-                        'ast', 'treb', 'stl', 'pts', 'blk', 'mp']
-    df = df.dropna(subset=columns_to_check)
+                        'ast', 'treb', 'stl', 'pts', 'blk', 'mp',
+                        'drtg', 'adrtg', 'dporpag', 'stops', 'bpm', 
+                        'obpm', 'dbpm', 'gbpm', 'ogbpm', 'dgbpm']
+    for column in columns_to_check:
+        df[column].fillna(train_stats['medians'].get(column, df[column].median()), inplace=True)
 
     # Drop 'Rec_Rank' column if it exists
     if 'Rec_Rank' in df.columns:
         df = df.drop('Rec_Rank', axis=1)
 
     return df, train_stats
+
