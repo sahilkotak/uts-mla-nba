@@ -1,0 +1,65 @@
+feature,name,description
+1,team,Name of team
+2,conf,Name of conference
+3,GP,Games played
+4,Min_per,Player's percentage of available team minutes played
+5,ORtg,"ORtg - Offensive Rating (available since the 1977-78 season in the NBA); for players it is points produced per 100 posessions, while for teams it is points scored per 100 possessions. This rating was developed by Dean Oliver, author of Basketball on Paper. Please see the article Calculating Individual Offensive and Defensive Ratings for more information."
+6,usg,Usg% - Usage Percentage (available since the 1977-78 season in the NBA); the formula is 100 * ((FGA + 0.44 * FTA + TOV) * (Tm MP / 5)) / (MP * (Tm FGA + 0.44 * Tm FTA + Tm TOV)). Usage percentage is an estimate of the percentage of team plays used by a player while he was on the floor.
+7,eFG,"eFG% - Effective Field Goal Percentage; the formula is (FG + 0.5 * 3P) / FGA. This statistic adjusts for the fact that a 3-point field goal is worth one more point than a 2-point field goal. For example, suppose Player A goes 4 for 10 with 2 threes, while Player B goes 5 for 10 with 0 threes. Each player would have 10 points from field goals, and thus would have the same effective field goal percentage (50%)."
+8,TS_per,"TS% - True Shooting Percentage; the formula is PTS / (2 * TSA). True shooting percentage is a measure of shooting efficiency that takes into account field goals, 3-point field goals, and free throws."
+9,ORB_per,ORB% - Offensive Rebound Percentage (available since the 1970-71 season in the NBA); the formula is 100 * (ORB * (Tm MP / 5)) / (MP * (Tm ORB + Opp DRB)). Offensive rebound percentage is an estimate of the percentage of available offensive rebounds a player grabbed while he was on the floor.
+10,DRB_per,DRB% - Defensive Rebound Percentage (available since the 1970-71 season in the NBA); the formula is 100 * (DRB * (Tm MP / 5)) / (MP * (Tm DRB + Opp ORB)). Defensive rebound percentage is an estimate of the percentage of available defensive rebounds a player grabbed while he was on the floor.
+11,AST_per,AST% - Assist Percentage (available since the 1964-65 season in the NBA); the formula is 100 * AST / (((MP / (Tm MP / 5)) * Tm FG) - FG). Assist percentage is an estimate of the percentage of teammate field goals a player assisted while he was on the floor.
+12,TO_per,TOV% - Turnover Percentage (available since the 1977-78 season in the NBA); the formula is 100 * TOV / (FGA + 0.44 * FTA + TOV). Turnover percentage is an estimate of turnovers per 100 plays.
+13,FTM,Free Throws
+14,FTA,Free Throw Attempts
+15,FT_per,Free Throw Percentage; the formula is FTM / FTA.
+16,twoPM,2P - 2-Point Field Goals
+17,twoPA,2PA - 2-Point Field Goal Attempts
+18,twoP_per,2P% - 2-Point Field Goal Percentage; the formula is 2P / 2PA.
+19,TPM,3P - 3-Point Field Goals (available since the 1979-80 season in the NBA)
+20,TPA,3PA - 3-Point Field Goal Attempts (available since the 1979-80 season in the NBA)
+21,TP_per,3P% - 3-Point Field Goal Percentage (available since the 1979-80 season in the NBA); the formula is 3P / 3PA.
+22,blk_per,BLK% - Block Percentage (available since the 1973-74 season in the NBA); the formula is 100 * (BLK * (Tm MP / 5)) / (MP * (Opp FGA - Opp 3PA)). Block percentage is an estimate of the percentage of opponent two-point field goal attempts blocked by the player while he was on the floor.
+23,stl_per,STL% - Steal Percentage (available since the 1973-74 season in the NBA); the formula is 100 * (STL * (Tm MP / 5)) / (MP * Opp Poss). Steal Percentage is an estimate of the percentage of opponent possessions that end with a steal by the player while he was on the floor.
+27,ftr,
+28,yr,"Student’s year of study: `Fr` for freshmen, `So` for sophomores, `Jr` for juniors, `Sr` for seniors"
+29,ht,Height of student
+30,num,Player's number
+31,porpag,Points Over Replacement Per Adjusted Game
+32,adjoe,AdjO – Adjusted offensive efficiency – An estimate of the offensive efficiency (points scored per 100 possessions) a team would have against the average D-I defense.
+33,pfr,
+34,year,Season's year
+35,type,"Type of metrics displayed: `All` for all types, `C` for conference`, `NC` for non-conference, `PC` for pre-conference tour, `R` for regular season, `P` for post-season, `T` for NCAA"
+36,Rec_Rank,Recruiting rank i.e. what the player was ranked as a recruit coming out of high school
+37,ast_tov,Ratio Assists against Turnovers
+38,rimmade,Shots made at or near the rim
+39,rimmade_rimmiss,Sum of Shots made at or near the rim and Shots missed
+40,midmade,Two point shots that were not made at or near the rim
+41,midmade_midmiss,Sum of Two point shots that were not made at or near the rim and Shots missed
+42,rim_ratio,Ratio between Shots made at or near the rim against Shots missed
+43,mid_ratio,Ratio between Two point shots that were not made at or near the rim and Shots missed
+44,dunksmade,Dunks made
+45,dunksmiss_dunksmade,Sum of Dunks made and Dunks missed
+46,dunks_ratio,Ratio between Dunks made and Dunks missed
+47,pick,Order of NBA draft
+48,drtg,"DRtg - Defensive Rating (available since the 1973-74 season in the NBA); for players and teams it is points allowed per 100 posessions. This rating was developed by Dean Oliver, author of Basketball on Paper. Please see the article Calculating Individual Offensive and Defensive Ratings for more information."
+49,adrtg,Adjusted DRtg
+50,dporpag,Asdjusted porpag
+54,stops,Stops - Stops; Dean Oliver's measure of individual defensive stops. Please see the article Calculating Individual Offensive and Defensive Ratings for more information.
+55,bpm,BPM - Estimate the player’s contribution in points above league average per 100 possessions played
+56,obpm,Offensive BPM
+57,dbpm,Defensive BPM
+58,gbpm,BPM 2.0
+59,mp,MP - Minutes Played (available since the 1951-52 season)
+60,ogbpm,Offensive BPM 2.0
+61,dgbpm,Defensive BPM 2.0
+62,oreb,ORB - Offensive Rebounds (available since the 1973-74 season in the NBA)
+63,dreb,DRB - Defensive Rebounds (available since the 1973-74 season in the NBA)
+64,treb,TRB - Total Rebounds (available since the 1950-51 season)
+65,ast,AST - Assists
+66,stl,STL - Steals (available since the 1973-74 season in the NBA)
+67,blk,BLK - Blocks (available since the 1973-74 season in the NBA)
+68,pts,PTS - Points
+69,player_id,Unique identifier of player
+70,drafted,Target - Was the player drafted at the end of the season
