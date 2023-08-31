@@ -137,35 +137,32 @@ class FeatureEngineer:
 
     def versatility_index(self):
         """Compute the player's versatility index."""
-        relevant_cols = ['pts', 'reb', 'ast', 'stl', 'blk']
-        if all(col in self.df.columns for col in relevant_cols):
-            self.df['versatility_index'] = self.df[relevant_cols].sum(axis=1)
+        if 'pts' in self.df.columns and 'reb' in self.df.columns and 'ast' in self.df.columns and 'stl' in self.df.columns and 'blk' in self.df.columns:
+            self.df['versatility_index'] = self.df['pts'] + self.df['reb'] + \
+                self.df['ast'] + self.df['stl'] + self.df['blk']
         return self
 
     def polynomial_features(self):
-        """Generate polynomial features for efficiency-related columns."""
+        """Generate polynomial features."""
+        poly = PolynomialFeatures(2, interaction_only=True, include_bias=False)
         efficiency_related_columns = [
             'pts', 'ast', 'reb', 'stl', 'blk', 'to', 'fg', 'ft']
-        if all(col in self.df.columns for col in efficiency_related_columns):
-            poly = PolynomialFeatures(
-                2, interaction_only=True, include_bias=False)
-            interactions = poly.fit_transform(
-                self.df[efficiency_related_columns])
-            interaction_df = pd.DataFrame(
-                interactions, columns=poly.get_feature_names_out(efficiency_related_columns))
-            self.df = pd.concat([self.df, interaction_df], axis=1)
+        existing_columns = [
+            col for col in efficiency_related_columns if col in self.df.columns]
+        interactions = poly.fit_transform(self.df[existing_columns])
+        interaction_df = pd.DataFrame(
+            interactions, columns=poly.get_feature_names_out(existing_columns))
+        self.df = pd.concat([self.df, interaction_df], axis=1)
         return self
 
     def binning_features(self):
         """Perform binning on features."""
+        binarizer = KBinsDiscretizer(
+            n_bins=3, encode='ordinal', strategy='quantile')
         if 'fg_ratio' in self.df.columns:
-            binarizer = KBinsDiscretizer(
-                n_bins=3, encode='ordinal', strategy='quantile')
             self.df['scoring_efficiency_bin'] = binarizer.fit_transform(
                 self.df[['fg_ratio']]).astype(int)
         if 'defensive_index' in self.df.columns:
-            binarizer.fit_transform(
-                self.df[['defensive_index']]).astype(int)
             self.df['defensive_metric_bin'] = binarizer.fit_transform(
                 self.df[['defensive_index']]).astype(int)
         if 'versatility_index' in self.df.columns:
