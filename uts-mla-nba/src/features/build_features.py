@@ -103,56 +103,74 @@ from sklearn.preprocessing import PolynomialFeatures, KBinsDiscretizer
 import pandas as pd
 
 
+# Modify the FeatureEngineer class to conditionally create new features
+
 class FeatureEngineer:
     def __init__(self, df):
         self.df = df
 
     def three_point_preference(self):
         """Compute the player's three-point shooting preference."""
-        self.df['three_point_preference'] = self.df['TPM'] / self.df['fgm']
+        if 'TPM' in self.df.columns and 'fgm' in self.df.columns:
+            self.df['three_point_preference'] = self.df['TPM'] / self.df['fgm']
         return self
 
     def inside_scoring_ability(self):
         """Compute the player's inside scoring ability."""
-        self.df['inside_scoring_ability'] = 1 - \
-            self.df['three_point_preference']
+        if 'three_point_preference' in self.df.columns:
+            self.df['inside_scoring_ability'] = 1 - \
+                self.df['three_point_preference']
         return self
 
     def playmaking_ability(self):
         """Compute the player's playmaking ability."""
-        self.df['playmaking_ability'] = self.df['ast'] / (1 + self.df['to'])
+        if 'ast' in self.df.columns and 'to' in self.df.columns:
+            self.df['playmaking_ability'] = self.df['ast'] / \
+                (1 + self.df['to'])
         return self
 
     def defensive_index(self):
         """Compute the player's defensive index based on steals and blocks."""
-        self.df['defensive_index'] = self.df['stl'] + self.df['blk']
+        if 'stl' in self.df.columns and 'blk' in self.df.columns:
+            self.df['defensive_index'] = self.df['stl'] + self.df['blk']
         return self
 
     def versatility_index(self):
         """Compute the player's versatility index."""
-        self.df['versatility_index'] = self.df['pts'] + self.df['reb'] + \
-            self.df['ast'] + self.df['stl'] + self.df['blk']
+        relevant_cols = ['pts', 'reb', 'ast', 'stl', 'blk']
+        if all(col in self.df.columns for col in relevant_cols):
+            self.df['versatility_index'] = self.df[relevant_cols].sum(axis=1)
         return self
 
     def polynomial_features(self):
-        poly = PolynomialFeatures(2, interaction_only=True, include_bias=False)
+        """Generate polynomial features for efficiency-related columns."""
         efficiency_related_columns = [
             'pts', 'ast', 'reb', 'stl', 'blk', 'to', 'fg', 'ft']
-        interactions = poly.fit_transform(self.df[efficiency_related_columns])
-        interaction_df = pd.DataFrame(
-            interactions, columns=poly.get_feature_names_out(efficiency_related_columns))
-        self.df = pd.concat([self.df, interaction_df], axis=1)
+        if all(col in self.df.columns for col in efficiency_related_columns):
+            poly = PolynomialFeatures(
+                2, interaction_only=True, include_bias=False)
+            interactions = poly.fit_transform(
+                self.df[efficiency_related_columns])
+            interaction_df = pd.DataFrame(
+                interactions, columns=poly.get_feature_names_out(efficiency_related_columns))
+            self.df = pd.concat([self.df, interaction_df], axis=1)
         return self
 
     def binning_features(self):
-        binarizer = KBinsDiscretizer(
-            n_bins=3, encode='ordinal', strategy='quantile')
-        self.df['scoring_efficiency_bin'] = binarizer.fit_transform(
-            self.df[['fg_ratio']]).astype(int)
-        self.df['defensive_metric_bin'] = binarizer.fit_transform(
-            self.df[['defensive_index']]).astype(int)
-        self.df['offensive_metric_bin'] = binarizer.fit_transform(
-            self.df[['versatility_index']]).astype(int)
+        """Perform binning on features."""
+        if 'fg_ratio' in self.df.columns:
+            binarizer = KBinsDiscretizer(
+                n_bins=3, encode='ordinal', strategy='quantile')
+            self.df['scoring_efficiency_bin'] = binarizer.fit_transform(
+                self.df[['fg_ratio']]).astype(int)
+        if 'defensive_index' in self.df.columns:
+            binarizer.fit_transform(
+                self.df[['defensive_index']]).astype(int)
+            self.df['defensive_metric_bin'] = binarizer.fit_transform(
+                self.df[['defensive_index']]).astype(int)
+        if 'versatility_index' in self.df.columns:
+            self.df['offensive_metric_bin'] = binarizer.fit_transform(
+                self.df[['versatility_index']]).astype(int)
         return self
 
     def get_dataframe(self):
