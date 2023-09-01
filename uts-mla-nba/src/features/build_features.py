@@ -101,58 +101,73 @@
 #         return self
 from sklearn.preprocessing import PolynomialFeatures, KBinsDiscretizer
 import pandas as pd
+import numpy as np
 
+
+# Modify the FeatureEngineer class to conditionally create new features
 
 class FeatureEngineer:
-    def __init__(self, df):
-        self.df = df
+    def __init__(self, dataframe):
+        self.df = dataframe.copy()
 
     def three_point_preference(self):
-        """Compute the player's three-point shooting preference."""
-        self.df['three_point_preference'] = self.df['TPM'] / self.df['fgm']
+        if '3PA' in self.df.columns and 'FGA' in self.df.columns:
+            self.df['three_point_preference'] = self.df['3PA'] / self.df['FGA']
         return self
 
     def inside_scoring_ability(self):
-        """Compute the player's inside scoring ability."""
-        self.df['inside_scoring_ability'] = 1 - \
-            self.df['three_point_preference']
+        if '2P' in self.df.columns and 'FGA' in self.df.columns:
+            self.df['inside_scoring_ability'] = self.df['2P'] / self.df['FGA']
         return self
 
     def playmaking_ability(self):
-        """Compute the player's playmaking ability."""
-        self.df['playmaking_ability'] = self.df['ast'] / (1 + self.df['to'])
+        if 'ast' in self.df.columns and 'pts' in self.df.columns:
+            # Prevent division by zero by replacing zero 'pts' with a small number
+            non_zero_pts = self.df['pts'].replace(0, np.finfo(float).eps)
+            self.df['playmaking_ability'] = self.df['ast'] / non_zero_pts
         return self
 
     def defensive_index(self):
-        """Compute the player's defensive index based on steals and blocks."""
-        self.df['defensive_index'] = self.df['stl'] + self.df['blk']
+        if 'stl' in self.df.columns and 'blk' in self.df.columns and 'GP' in self.df.columns:
+            self.df['defensive_metric'] = (self.df['stl'] + self.df['blk']) / self.df['GP']
         return self
 
     def versatility_index(self):
-        """Compute the player's versatility index."""
-        self.df['versatility_index'] = self.df['pts'] + self.df['reb'] + \
-            self.df['ast'] + self.df['stl'] + self.df['blk']
+        if all(col in self.df.columns for col in ['pts', 'ast', 'stl', 'blk']):
+            self.df['versatility_index'] = self.df['pts'] * self.df['ast'] * self.df['stl'] * self.df['blk']
         return self
 
     def polynomial_features(self):
-        poly = PolynomialFeatures(2, interaction_only=True, include_bias=False)
-        efficiency_related_columns = [
-            'pts', 'ast', 'reb', 'stl', 'blk', 'to', 'fg', 'ft']
-        interactions = poly.fit_transform(self.df[efficiency_related_columns])
-        interaction_df = pd.DataFrame(
-            interactions, columns=poly.get_feature_names_out(efficiency_related_columns))
-        self.df = pd.concat([self.df, interaction_df], axis=1)
+        # Select only numeric columns (excluding 'drafted')
+        numeric_cols = self.df.select_dtypes(include=['number']).columns.tolist()
+        if 'drafted' in numeric_cols:
+            numeric_cols.remove('drafted')
+            
+        if 'pts' in numeric_cols:
+            self.df = self.df.join(
+                self.df[numeric_cols].apply(lambda x: x * self.df['pts'], axis=0).add_suffix('_pts'),
+                rsuffix='_pts'
+            )
+        if 'ast' in numeric_cols:
+            self.df = self.df.join(
+                self.df[numeric_cols].apply(lambda x: x * self.df['ast'], axis=0).add_suffix('_ast'),
+                rsuffix='_ast'
+            )
+        if 'stl' in numeric_cols:
+            self.df = self.df.join(
+                self.df[numeric_cols].apply(lambda x: x * self.df['stl'], axis=0).add_suffix('_stl'),
+                rsuffix='_stl'
+            )
+        if 'blk' in numeric_cols:
+            self.df = self.df.join(
+                self.df[numeric_cols].apply(lambda x: x * self.df['blk'], axis=0).add_suffix('_blk'),
+                rsuffix='_blk'
+            )
         return self
 
     def binning_features(self):
-        binarizer = KBinsDiscretizer(
-            n_bins=3, encode='ordinal', strategy='quantile')
-        self.df['scoring_efficiency_bin'] = binarizer.fit_transform(
-            self.df[['fg_ratio']]).astype(int)
-        self.df['defensive_metric_bin'] = binarizer.fit_transform(
-            self.df[['defensive_index']]).astype(int)
-        self.df['offensive_metric_bin'] = binarizer.fit_transform(
-            self.df[['versatility_index']]).astype(int)
+        if 'defensive_metric' in self.df.columns:
+            self.df['defensive_metric_bin'] = pd.cut(self.df['defensive_metric'], bins=3, labels=['Low', 'Medium', 'High'])
         return self
 
     def get_dataframe(self):
