@@ -23,7 +23,7 @@ pip install -r requirements.txt
 - src/: Python scripts for data preprocessing, feature engineering, and model training.
 - README.md: Overview and guide to the project.
 - requirements.txt: List of dependencies.
-```
+
 
 ## Contributing
 
