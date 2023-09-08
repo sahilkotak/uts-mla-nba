@@ -101,6 +101,6 @@ def generate_stacking_predictions(stacking_classifier, test_dataframe):
 
     # Create a submission DataFrame
     submission_stacking = pd.DataFrame(
-        {'player_id': test_dataframe.index, 'drafted': ensemble_probabilities})  # Assuming 'player_id' is the index
+        {'player_id': test_dataframe['player_id'], 'drafted': ensemble_probabilities})  # Assuming 'player_id' is the index
 
     return submission_stacking

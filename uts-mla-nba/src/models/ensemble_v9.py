@@ -2,6 +2,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.utils.class_weight import compute_class_weight
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import roc_auc_score
@@ -40,15 +41,20 @@ def train_stacking_ensemble(train_dataframe, target_column_name, test_size=0.2, 
             ('categorical', OneHotEncoder(drop='first', handle_unknown='ignore'), categorical_columns)
         ])
 
-    # Create pipelines for both logistic regression and SVM
+    # Compute class weights
+    classes = np.unique(target_train)
+    class_weights = compute_class_weight('balanced', classes=[0, 1], y=target_train)
+    class_weight_dict = {cls: weight for cls, weight in zip(classes, class_weights)}
+
+    # Create pipelines for both logistic regression and SVM with class weights
     logreg_pipeline = Pipeline([
         ('preprocessor', preprocessor),
-        ('classifier', LogisticRegression(max_iter=1000))
+        ('classifier', LogisticRegression(max_iter=1000, class_weight=class_weight_dict))
     ])
 
     svm_pipeline = Pipeline([
         ('preprocessor', preprocessor),
-        ('classifier', SVC(kernel='linear', probability=True))
+        ('classifier', SVC(kernel='linear', probability=True, class_weight=class_weight_dict))
     ])
 
     # Train both models on the training data
